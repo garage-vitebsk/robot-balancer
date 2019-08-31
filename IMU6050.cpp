@@ -275,7 +275,7 @@ int IMU6050::read_gyro_accel_vals(uint8_t *accel_t_gyro_ptr) {
 // The sensor should be motionless on a horizontal surface
 //  while calibration is happening
 void IMU6050::calibrate_sensors() {
-    int num_readings = 10;
+    int num_readings = 50;
     float x_accel = 0;
     float y_accel = 0;
     float z_accel = 0;

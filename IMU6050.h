@@ -21,8 +21,6 @@
 //
 // The accuracy is 16-bits.
 //
-// Temperature sensor from -40 to +85 degrees Celsius
-//   340 per degrees, -512 at 35 degrees.
 //
 // At power-up, all registers are zero, except these two:
 //      Register 0x6B (PWR_MGMT_2) = 0x40  (I read zero).

@@ -275,7 +275,6 @@ int IMU6050::read_gyro_accel_vals(uint8_t *accel_t_gyro_ptr) {
 // The sensor should be motionless on a horizontal surface
 //  while calibration is happening
 void IMU6050::calibrate_sensors() {
-    int num_readings = 50;
     float x_accel = 0;
     float y_accel = 0;
     float z_accel = 0;
@@ -290,7 +289,7 @@ void IMU6050::calibrate_sensors() {
     read_gyro_accel_vals((uint8_t*) &accel_t_gyro);
 
     // Read and average the raw values from the IMU
-    for (int i = 0; i < num_readings; i++) {
+    for (int i = 0; i < calibration_time; i++) {
         read_gyro_accel_vals((uint8_t*) &accel_t_gyro);
         x_accel += accel_t_gyro.value.x_accel;
         y_accel += accel_t_gyro.value.y_accel;
@@ -300,12 +299,12 @@ void IMU6050::calibrate_sensors() {
         z_gyro += accel_t_gyro.value.z_gyro;
         delay(100);
     }
-    x_accel /= num_readings;
-    y_accel /= num_readings;
-    z_accel /= num_readings;
-    x_gyro /= num_readings;
-    y_gyro /= num_readings;
-    z_gyro /= num_readings;
+    x_accel /= calibration_time;
+    y_accel /= calibration_time;
+    z_accel /= calibration_time;
+    x_gyro /= calibration_time;
+    y_gyro /= calibration_time;
+    z_gyro /= calibration_time;
 
     // Store the raw calibration values globally
     base_x_accel = x_accel;

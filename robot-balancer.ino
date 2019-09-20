@@ -6,10 +6,10 @@
 #define LED_PIN 13
 #define OUTPUT_MIN -255
 #define OUTPUT_MAX 255
-#define MAX_DIF 7
-#define KP 35
-#define KI 9.25
-#define KD 52
+#define MAX_DIF 30
+#define KP 20
+#define KI 15
+#define KD 32
 
 //TODO add configurable pins
 DriveSystem *driveSystem = new DriveSystem(new Motor(6, 7, 8),
@@ -26,11 +26,11 @@ void setup() {
 	pinMode(13, OUTPUT);
 	digitalWrite(LED_PIN, 0);
   Serial.begin(19200);
-//  Serial.println("start");
+  Serial.println("calibration start");
   imu = new IMU6050();
   myPID.setBangBang(MAX_DIF);
   myPID.setTimeStep(5);
-//  Serial.println("connected");
+  Serial.println("calibration end");
 	digitalWrite(LED_PIN, 1);
 }
 
@@ -39,7 +39,11 @@ void loop() {
   angle = imu->get_gyro_y_angle();
   myPID.run();
   driveSystem->setSpeed(-speed, -speed);
-  Serial.println(speed);
+  Serial.print(angle);
+  Serial.print(" = ");
+  Serial.print(speed);
+  Serial.print(" ");
+  Serial.println(imu->get_last_process_time());
   digitalWrite(LED_PIN, myPID.atSetPoint(2));
   delay(5);
 }

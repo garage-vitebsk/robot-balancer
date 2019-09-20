@@ -671,7 +671,7 @@ class IMU6050 {
     private:
         // Use the following global variables and access functions to help store the overall
         // rotation angle of the sensor
-        int calibration_time = 50;
+        int calibration_time = 100;
         unsigned long last_read_time;
         float last_x_angle;  // These are the filtered angles
         float last_y_angle;

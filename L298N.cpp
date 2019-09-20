@@ -58,6 +58,7 @@ void DriveSystem::setSpeed(int leftSpeed, int rightSpeed) { // СѓС‚СЃР°
         leftMotor->setForward(); // РїСЂСЏРјР°СЏ РїРѕР»СЋСЃРѕРІРєР° РґРІРёРіР°С‚РµР»СЏ
         leftMotor->setSpeed(leftSpeed); // СѓСЃС‚Р°РЅРѕРІРєР° РЁР�Рњ РЅР° Р·Р°РґР°РЅРЅСѓСЋ РґР»РёРЅСѓ РёРјРїСѓР»СЊСЃР°
     }
+    delay(2);
     if (rightSpeed == 0) { // Р°РЅР°Р»РѕРіРёС‡РЅРѕ РґР»СЏ РїСЂР°РІРѕРіРѕ РјРѕС‚РѕСЂР°
         rightMotor->stop();
     } else if (rightSpeed < 0) {
@@ -71,4 +72,3 @@ void DriveSystem::setSpeed(int leftSpeed, int rightSpeed) { // СѓС‚СЃР°
     this->leftSpeed = leftSpeed;
     this->rightSpeed = rightSpeed;
 }
-

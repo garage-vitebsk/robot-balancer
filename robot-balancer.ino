@@ -1,22 +1,30 @@
 #include <MPU6050_6Axis_MotionApps20.h>
 #include "L298N.h"
-#include <AutoPID.h>
+#include "PID_v1.h"
+#include "math.h"
 
 #define LED_PIN 13
+
 #define OUTPUT_MIN -255
 #define OUTPUT_MAX 255
 
-#define MAX_DIF 40
-#define KP 6
-#define KD 1.2
-#define KI 0.75
+#define TIME_STEP 2
+#define ZERO_DIF 3
+#define ADJUSTMENT 30
+
+#define KP 25 //25
+#define KD 0.2 //0.2
+#define KI 600 //600
 
 DriveSystem *driveSystem = new DriveSystem(new Motor(6, 7, 8),
     new Motor(11, 10, 9));
 
 double angle = 0;
 double target = 0;
+double shortSpeed = 0;
+double longSpeed = 0;
 double speed = 0;
+
 Quaternion q;           // [w, x, y, z]         quaternion container
 float ypr[3];           // [yaw, pitch, roll]   yaw/pitch/roll container and gravity vector
 uint8_t fifoBuffer[64]; // FIFO storage buffer
@@ -28,7 +36,7 @@ uint16_t packetSize;    // expected DMP packet size (default is 42 bytes)
 uint16_t fifoCount;     // count of all bytes currently in FIFO
 
 MPU6050 mpu;
-AutoPID myPID = AutoPID(&angle, &target, &speed, OUTPUT_MIN, OUTPUT_MAX, KP, KI, KD);
+PID pid = PID(&angle, &speed, &target, KP, KI, KD, DIRECT);
 
 void setup() {
 #if I2CDEV_IMPLEMENTATION == I2CDEV_ARDUINO_WIRE
@@ -76,14 +84,27 @@ void setup() {
     // 1 = initial memory load failed
     // 2 = DMP configuration updates failed
     // (if it's going to break, usually the code will be 1)
-    Serial.print(F("DMP Initialization failed (code "));
+    Serial.print("DMP Initialization failed (code ");
     Serial.print(devStatus);
-    Serial.println(F(")"));
+    Serial.println(")");
   }
-  myPID.setBangBang(MAX_DIF);
-  myPID.setTimeStep(5);
+
+//  shortPid.SetMode(AUTOMATIC);
+//  shortPid.SetSampleTime(TIME_STEP);
+//  int speedLimit = OUTPUT_MAX - ADJUSTMENT;
+//  shortPid.SetOutputLimits(-speedLimit, speedLimit);
+  
+  setupPid(pid);
+
   Serial.println("connected");
   digitalWrite(LED_PIN, 1);
+}
+
+void setupPid(PID &pid) {
+  pid.SetMode(AUTOMATIC);
+  pid.SetSampleTime(TIME_STEP);
+  int speedLimit = OUTPUT_MAX - ADJUSTMENT;
+  pid.SetOutputLimits(-speedLimit, speedLimit);
 }
 
 void loop() {
@@ -123,14 +144,23 @@ void loop() {
     //    Serial.println(ypr[2] * 180 / M_PI);
     angle = ypr[1] * 180 / M_PI;
 
+    pid.Compute();
+
+    speed = adjustSpeed(speed);
     Serial.print(angle);
-    Serial.print(" - ");
-    Serial.print(speed);
-    Serial.print(fifoCount);
-    Serial.println(" : ");
-    myPID.run();
+    Serial.print("\t");
+    Serial.println(speed);
     driveSystem->setSpeed(speed, speed);
-    digitalWrite(LED_PIN, myPID.atSetPoint(2));
-    delay(10);
+    digitalWrite(LED_PIN, fabs(angle) < ZERO_DIF);
+    delay(TIME_STEP);
   }
+}
+
+double adjustSpeed(double speed) {
+  if (speed < -ZERO_DIF) {
+    return speed - ADJUSTMENT;
+  } else if (speed > ZERO_DIF) {
+    return speed + ADJUSTMENT;
+  }
+  return 0;
 }
